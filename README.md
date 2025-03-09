@@ -2,7 +2,7 @@
 
 A Retrieval-Augmented Generation (RAG) system specialized for nuclear safety documentation analysis and question answering.
 
-![Nuclear Safety RAG](https://via.placeholder.com/800x400?text=Nuclear+Safety+RAG)
+
 
 ## Overview
 
