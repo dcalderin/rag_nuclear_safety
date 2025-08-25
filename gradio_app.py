@@ -18,7 +18,7 @@ MODEL_CONFIGS = {
         "recommended_chunk": 1000,
         'overlap':300},
     'atomic-canyon-fermi-nrc':{"max_tokens": 1024,
-        "dimension": 768,
+        "dimension": 30524,
         "recommended_chunk": 800,
         'overlap':300}}
 LLM_CONFIGS = {
@@ -101,14 +101,9 @@ def process_file(file):
     if not file:
         return "No file uploaded."
 
-    # Extract the actual file path
-    temp_path = file.name  
-    filename = os.path.basename(temp_path)  # Extract only the filename
-
-    # Replace temporary path with Gradio's running directory
-    gradio_dir = os.getcwd()  # Get current working directory
-    new_path = os.path.join(gradio_dir, filename)  # Construct new absolute path
-    return new_path
+    # Use the actual temporary file path that Gradio provides
+    # Gradio stores uploaded files in temporary locations and file.name contains the correct path
+    return file.name
 
 def setup_process(files,model_choice,llm_choice,chunk_size,overlap,temp_def, max_tokens):
     
@@ -118,14 +113,13 @@ def setup_process(files,model_choice,llm_choice,chunk_size,overlap,temp_def, max
 
     raged_hdf5=create_rag_chunks_from_hdf5(pdf_hdf5,chunk_size,overlap)
 
-    for c in raged_hdf5[:20]:
-        print(f"Chunk (Page {c['page']}) - {c['pdf_link']}\n{c['chunk']}\n")
+    # for c in raged_hdf5[:20]:
+    #     print(f"Chunk (Page {c['page']}) - {c['pdf_link']}\n{c['chunk']}\n")
     rag_chunks=embed_text(raged_hdf5,model_choice,llm_choice)
 
     df = pd.DataFrame(rag_chunks)
 
-    df.to_csv('racchunks.csv')
-    
+    df.to_csv('rag_chunks.csv')
     status_message = "Setup complete: embeddings generated."
 
     return df, status_message
@@ -133,8 +127,21 @@ def setup_process(files,model_choice,llm_choice,chunk_size,overlap,temp_def, max
 # call back functions for question embedding LLM input and answer
 def answer_question(question_input, model_choice, top_n, rag_chunks, llm_choice, temp_def, max_tokens):
     try:
+        # Return processing status first
+        processing_status = "🔍 Processing your question..."
+        yield processing_status, ""
+        
+        # Search for relevant documents
+        processing_status = "📚 Searching relevant documents..."
+        yield processing_status, ""
+        
         df_top = search_docs(rag_chunks, question_input, model_choice, llm_choice, top_n, to_print=True)
         res = df_top
+        
+        # Generate answer with LLM
+        processing_status = "🤖 Generating answer with AI..."
+        yield processing_status, ""
+        
         ans = get_cited_RAG_completion(
             question_input, 
             res, 
@@ -143,18 +150,52 @@ def answer_question(question_input, model_choice, top_n, rag_chunks, llm_choice,
             temp_def=temp_def, 
             max_tokens=max_tokens
         )
-        return ans
+        
+        # Final result
+        yield "✅ Complete", ans
+        
     except Exception as e:
-        return f"Error processing question: {str(e)}"
+        yield "❌ Error occurred", f"Error processing question: {str(e)}"
 
 
 
 # call back function for LLM input and answer
-
+theme = gr.themes.Base(
+    primary_hue="gray",
+    secondary_hue="gray", 
+    neutral_hue="gray",
+    font=("Arial", "Helvetica", "sans-serif"),
+    font_mono=("Courier New", "monospace"),
+    radius_size="none",  # No rounded corners
+    spacing_size="sm",   # Compact spacing
+).set(
+    # Colors
+    body_background_fill="white",
+    block_background_fill="#fafafa",
+    block_border_color="#d0d0d0",
+    block_border_width="1px",
+    shadow_drop="none",  # No shadows in v5
+    
+    # Buttons
+    button_primary_background_fill="#003366",
+    button_primary_background_fill_hover="#002244",
+    button_primary_text_color="white",
+    button_primary_border_color="transparent",
+    
+    # Inputs
+    input_background_fill="white",
+    input_border_color="#d0d0d0",
+    input_border_width="1px",
+    
+    # Text
+    block_title_text_weight="400",  # Normal weight
+    block_label_text_weight="400",
+)
 
 # Build the Gradio interface
-with gr.Blocks() as demo:
-    gr.Markdown("# Secure AI Nuclear Safety Analyser \n Retreival Augmented Generation")
+with gr.Blocks(title="Nuclear Power Assistant for Retrieval of Technical Data", theme=theme) as demo:
+    gr.Markdown("# Designed for Nuclear Technical Data Retrieval and Analysis")
+    gr.Markdown("RAG (Retrieval-Augmented Generation) Application for Nuclear Safety")
     
     with gr.Tab("Set Up"):
         with gr. Row():
@@ -215,11 +256,34 @@ with gr.Blocks() as demo:
     # When the model dropdown changes, update both the chunk_size and overlap sliders.
     
         with gr.Tab("Ask Question"):
-            question_input = gr.Textbox(label="Your Question")
             top_n = gr.Slider(minimum=1, maximum=100, step=1, label="Similarity Threshold",value=20)
+            question_input = gr.Textbox(label="Your Question")
             answer_button = gr.Button("Answer")
-            answer_output = gr.Markdown(label="Answer")
-            answer_button.click(fn=answer_question, inputs=[question_input, model_choice, top_n,rag_chunks,llm_choice,temp_def, max_tokens], outputs=answer_output)
+            
+            # Add processing status indicator
+            processing_status = gr.Textbox(
+                label="Status",
+                value="Ready to answer questions",
+                interactive=False,
+                show_copy_button=False
+            )
+            
+            answer_output = gr.Markdown(
+                label="Answer",
+                latex_delimiters=[
+                    {"left": "$$", "right": "$$", "display": True},   # Block math
+                    {"left": "$", "right": "$", "display": False},     # Inline math
+                    {"left": "\\[", "right": "\\]", "display": True},  # Block math alternative
+                    {"left": "\\(", "right": "\\)", "display": False}  # Inline math alternative
+                ]
+            )
+            
+            # Update button click to handle both status and answer outputs
+            answer_button.click(
+                fn=answer_question, 
+                inputs=[question_input, model_choice, top_n, rag_chunks, llm_choice, temp_def, max_tokens], 
+                outputs=[processing_status, answer_output]
+            )
     
 
  
