@@ -1,2 +1,0 @@
-[console_scripts]
-nuc-rag = nuc_rag.main:main
