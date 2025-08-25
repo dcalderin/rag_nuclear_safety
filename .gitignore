@@ -1,0 +1,117 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# SENSITIVE FILES - EXCLUDE FROM PUBLIC REPO
+*.pdf
+*.hdf5
+*.csv
+*.xlsx
+*.xls
+
+# Specific sensitive files
+PUB2058_web_gsg_18.pdf
+pdfs_chunks.hdf5
+racchunks.csv
+rag_chunks.csv
+ranked_chunk*.csv
+ranked_chunk*.xlsx
+
+# Development/Working files (not for public consumption)
+custom_embed.py
+docker-compose.txt
+dockerfile.txt
+github-workflow-ci.txt
+github-workflow-deploy.txt
+gitignore.txt
+requirements-txt.txt
+
+# Documentation that should stay private
+cline_docs/
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# API keys and secrets
+.env
+.env.local
+.env.production
+config.json
+secrets.json
+
+# HuggingFace cache
+.cache/
+transformers_cache/

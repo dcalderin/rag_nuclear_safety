@@ -9,10 +9,10 @@ A Retrieval-Augmented Generation (RAG) system specialized for nuclear safety doc
 This system combines document processing, semantic search, and large language models to provide accurate, context-aware responses to nuclear safety queries based on official documentation. It uses a chunking strategy to break documents into manageable pieces, embeds them using various embedding models, and retrieves the most relevant information when answering questions.
 
 Key features:
-- PDF document processing and structured storage using HDF5
+- PDF document processing and structured storage using HDF5, keeping track of metadata, to link source file
 - Configurable text chunking with adjustable chunk size and overlap
-- Support for multiple embedding models (OpenAI, SentenceTransformers, etc.)
-- Integration with Azure OpenAI and OpenAI APIs
+- Support for multiple embedding models (OpenAI, SentenceTransformers, Fermi model.)
+- Integration with Azure OpenAI and OpenAI APIs, but could be extended to local LLMs in a localhost configuration
 - Gradio-based user interface for document upload and question answering
 - Source citation in responses for traceability and verification
 - Custom HDF5-based vector database stored locally for enhanced security
@@ -136,7 +136,7 @@ The interface has two main tabs:
 The system supports the following embedding models:
 - `all-MiniLM-L6-v2` (SentenceTransformers)
 - `text-embedding-ada-002` (OpenAI)
-- `atomic-canyon-fermi-nrc` (Custom model)
+- `atomic-canyon-fermi-nrc` (Trained on US NRC ADAMS)
 
 Add or modify models in the `MODEL_CONFIGS` dictionary in `gradio_app.py`.
 
