@@ -104,7 +104,7 @@ def get_cited_RAG_completion(query, search_results,llm_choice, n_results=3, temp
             client = AzureOpenAI(
                 azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
                 api_key=os.environ.get("AZURE_OPENAI_KEY"),
-                api_version="2024-05-01-preview"
+                api_version=os.environ.get("AZURE_VERSION")
             )
             completion = client.chat.completions.create(
                 model="gpt4-testing-app",  # Your Azure deployment name

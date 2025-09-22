@@ -1,12 +1,25 @@
+# Nuclear Safety RAG System Requirements
+
+# Web Interface
 gradio>=4.0.0
-openai>=1.0.0
-numpy>=1.24.0
-pandas>=2.0.0
-torch>=2.0.0
-transformers>=4.30.0
-sentence-transformers>=2.2.2
-pymupdf>=1.22.0
-h5py>=3.9.0
-python-dotenv>=1.0.0
-openpyxl>=3.0.10
-tf-keras>=2.16.0
+
+# AI and Machine Learning
+openai>=1.0.0                    # OpenAI and Azure OpenAI API integration
+torch>=2.0.0                     # PyTorch for neural networks and embeddings
+transformers>=4.30.0             # HuggingFace transformers library (atomic-canyon/fermi-1024)
+sentence-transformers>=2.2.2     # Sentence embeddings (all-MiniLM-L6-v2, etc.)
+tf-keras>=2.16.0                 # TensorFlow/Keras backend support
+
+# Data Processing and Storage
+numpy>=1.24.0                    # Numerical computing and sparse vector operations
+pandas>=2.0.0                    # Data manipulation and analysis
+h5py>=3.9.0                      # HDF5 file format support for vector storage
+
+# Document Processing
+pymupdf>=1.22.0                  # PDF text extraction and processing (fitz)
+PyPDF2>=3.0.0                    # Alternative PDF processing library
+langchain>=0.1.0                 # Text splitting and chunking utilities
+
+# Configuration and Utilities
+python-dotenv>=1.0.0             # Environment variable management
+openpyxl>=3.0.10                 # Excel file operations
