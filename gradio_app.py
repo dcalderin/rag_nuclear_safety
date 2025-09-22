@@ -18,7 +18,7 @@ MODEL_CONFIGS = {
         "recommended_chunk": 1000,
         'overlap':300},
     'atomic-canyon-fermi-nrc':{"max_tokens": 1024,
-        "dimension": 30524,
+        "dimension": 768,
         "recommended_chunk": 800,
         'overlap':300}}
 LLM_CONFIGS = {
@@ -103,6 +103,7 @@ def process_file(file):
 
     # Use the actual temporary file path that Gradio provides
     # Gradio stores uploaded files in temporary locations and file.name contains the correct path
+    
     return file.name
 
 def setup_process(files,model_choice,llm_choice,chunk_size,overlap,temp_def, max_tokens):

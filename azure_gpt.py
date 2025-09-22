@@ -61,6 +61,7 @@ def make_cited_rag_prompt(query, df):
         Where:
         * $C_i$ = activity concentration of radionuclide i
         * $CL_i$ = clearance level for radionuclide i
+        
         - This separates LaTeX from complex prose
     3. Source Usage:
        - Use only information from the provided search results.
@@ -78,9 +79,7 @@ def make_cited_rag_prompt(query, df):
 
     ### Context:
     {context}
-    6. Missing context:
-       - If the context does not contain relevant information, state "Couldnt find the information to that level of similaroty, adjust your query or change the similarity threshold."
-       - Do not fabricate information or make assumptions.
+
     ### Query:
     {query}
 

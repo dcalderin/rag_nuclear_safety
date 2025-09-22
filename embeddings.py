@@ -3,15 +3,17 @@
 # and for performing chunking. These functions are just placeholders; you would
 # need to fill in your actual model calls and logic.
 from openai import AzureOpenAI, OpenAI
-from hdf5_file_constructor import load_pdfs_from_hdf5
 import numpy as np 
 from sentence_transformers import SentenceTransformer
 import os 
 import re
-from transformers import AutoModel, AutoTokenizer
-import torch
 
+from hdf5_file_constructor import load_pdfs_from_hdf5
+from custom_embed import get_fermi_sentence_embedding
 
+########################################################################################
+#################------STEP 1: EMBEDDING THE CORPUS DB -------##########################
+########################################################################################
 
 def embed_text(raged_hdf5, model_name,llm_choice):
     # Example: call your embedding model (could be via Azure OpenAI)
@@ -80,14 +82,13 @@ def embed_text(raged_hdf5, model_name,llm_choice):
 
 
             except Exception as e:
-                print(f' Error with embedding as {str(e)}')
-                # break
+                print(f' Error with embedding as {str(e)} /n/n Trying to install sentence-transformers and rerun')
         else:
-            
+            print("Using Fermi 1024 model for embedding")
             try:
                 for chunk in raged_hdf5:
                     normalized_text = normalize_text(chunk["chunk"])
-                    embedding = get_sentence_embedding(normalized_text)
+                    embedding = get_fermi_sentence_embedding(normalized_text)
                     chunk["embedded"] = embedding
             except Exception as e:
                 print(f' Error with atomic-canyon embedding as {str(e)}')
@@ -98,7 +99,10 @@ def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
-## add for the differentn models
+########################################################################################
+#########------STEP 2: SEARCHING THE CORPUS DB -------####################################
+########################################################################################
+## add for the different models
 def search_docs(df, user_query, model_name, llm_choice,top_n, to_print=True,):
     
     if model_name == "all-MiniLM-L6-v2":
@@ -107,7 +111,7 @@ def search_docs(df, user_query, model_name, llm_choice,top_n, to_print=True,):
         nor_query = [normalize_text(user_query)]
 
             # Generate embeddings for all chunks
-        embeddings = model.encode(nor_query, convert_to_tensor=True)
+        embedding = model.encode(nor_query, convert_to_tensor=True)
         
     elif model_name == "text-embedding-ada-002":
         if llm_choice == "AzureGPT":
@@ -128,7 +132,7 @@ def search_docs(df, user_query, model_name, llm_choice,top_n, to_print=True,):
             model_name, # model should be set to the deployment name you chose when you deployed the text-embedding-ada-002 (Version 2) model,
             )
     else:
-        embedding = get_sentence_embedding(normalize_text(user_query))
+        embedding = get_fermi_sentence_embedding(normalize_text(user_query))
     
     df["similarities"] = df.embedded.apply(lambda x: cosine_similarity(x, embedding))
     
@@ -186,27 +190,3 @@ def create_rag_chunks_from_hdf5(hdf5_filename, chunk_size=300,overlap=50):
                         "pdf_link": f"{pdf_link}#page={page_num}"
                     })
     return rag_chunks
-
-
-
-
-import torch
-from transformers import AutoModel, AutoTokenizer
-
-def get_sentence_embedding(text):
-    # Load model and tokenizer
-    model_name = "atomic-canyon/fermi-1024"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name)
-
-    # Tokenize input
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-
-    # Forward pass
-    with torch.no_grad():
-        outputs = model(**inputs)
-
-    # Extract CLS token embedding and flatten to 1D
-    embedding = outputs.last_hidden_state[:, 0, :].squeeze(0)  # Shape: (768,)
-
-    return embedding
